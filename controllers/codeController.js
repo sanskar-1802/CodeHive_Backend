@@ -1,63 +1,59 @@
-const axios = require("axios");
+const Code = require("../models/Code");
 
-exports.executeCode = async (req, res) => {
+exports.saveCode = async (req, res) => {
 
   try {
 
     const {
+      roomId,
       code,
       language,
+      username,
     } = req.body;
 
-    const response =
-      await axios.post(
+    const savedCode =
+      await Code.create({
 
-        "https://judge0-ce.p.rapidapi.com/submissions?base64_encoded=false&wait=true",
+        roomId,
+        code,
+        language,
+        username,
+      });
 
-        {
-          source_code: code,
-
-          language_id: Number(language),
-        },
-
-        {
-          headers: {
-
-            "Content-Type":
-              "application/json",
-
-            "X-RapidAPI-Key":
-              process.env.RAPIDAPI_KEY,
-
-            "X-RapidAPI-Host":
-              "judge0-ce.p.rapidapi.com",
-          },
-        }
-      );
-
-    return res.json({
-
-      stdout:
-        response.data.stdout,
-
-      stderr:
-        response.data.stderr,
-
-      compile_output:
-        response.data.compile_output,
-    });
+    res.status(201).json(savedCode);
 
   } catch (err) {
 
-    console.log(
-      "Code Execute Error:",
-      err.response?.data || err
-    );
+    console.log(err);
 
-    return res.status(500).json({
+    res.status(500).json({
+      message: "Save failed",
+    });
+  }
+};
 
+exports.getHistory = async (
+  req,
+  res
+) => {
+
+  try {
+
+    const history =
+      await Code.find({
+        roomId:
+          req.params.roomId,
+      });
+
+    res.json(history);
+
+  } catch (err) {
+
+    console.log(err);
+
+    res.status(500).json({
       message:
-        "Code execution failed",
+        "History fetch failed",
     });
   }
 };
