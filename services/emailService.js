@@ -1,9 +1,17 @@
 const nodemailer = require("nodemailer");
 
 exports.sendOTP = async (email, otp) => {
+
   try {
+
     const transporter = nodemailer.createTransport({
-      service: "gmail",
+
+      host: "smtp.gmail.com",
+
+      port: 587,
+
+      secure: false,
+
       auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
@@ -11,14 +19,41 @@ exports.sendOTP = async (email, otp) => {
     });
 
     const info = await transporter.sendMail({
+
       from: process.env.EMAIL_USER,
+
       to: email,
-      subject: "Verify your account",
-      text: `Your OTP is ${otp}`,
+
+      subject: "CodeHive OTP Verification",
+
+      html: `
+        <div style="
+          font-family: Arial;
+          padding: 20px;
+        ">
+          <h2>CodeHive Verification</h2>
+
+          <p>Your OTP is:</p>
+
+          <h1>${otp}</h1>
+
+          <p>
+            OTP expires in 5 minutes.
+          </p>
+        </div>
+      `,
     });
 
-    console.log("Email sent:", info.response); // ✅ ADD THIS
+    console.log(
+      "✅ Email sent:",
+      info.response
+    );
+
   } catch (error) {
-    console.error("Email error:", error); // ❌ IMPORTANT
+
+    console.log(
+      "❌ Email error:",
+      error
+    );
   }
 };
